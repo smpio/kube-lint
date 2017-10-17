@@ -10,8 +10,7 @@ class Scanner:
     def __init__(self, checks):
         self.checks = checks
         self.sentry = None
-        api = client.VersionApi()
-        self.apiserver_version = api.get_code().git_version
+        self.apiserver_version = client.VersionApi().get_code().git_version
 
     def scan(self, namespace=None):
         for check in self.checks:
