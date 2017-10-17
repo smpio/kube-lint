@@ -1,2 +1,2 @@
 # kube-lint
-Scan cluster for most common configuration errors
+Scan Kubernetes cluster for most common configuration errors
