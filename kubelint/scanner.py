@@ -22,7 +22,7 @@ class Scanner:
             if self.sentry:
                 self.sentry.captureMessage(str(issue), data={
                     'logger': check_name,
-                    'level': issue.severity,
+                    'level': issue.severity.lower(),
                 }, extra={
                     'namespace': issue.namespace,
                     'object_name': issue.object_name,
