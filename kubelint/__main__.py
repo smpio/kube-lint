@@ -32,9 +32,9 @@ def main():
         args.check.insert(0, default_checks_dir)
 
     checks = list(load_checks(args.check))
-    scanner = Scanner(checks)
+    scanner = Scanner(args.namespace)
     scanner.sentry_dsn = args.sentry_dsn
-    scanner.scan(args.namespace)
+    scanner.scan(checks)
 
 
 def load_checks(checks):

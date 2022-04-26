@@ -54,3 +54,10 @@ def resource_spec(prefix=None, group=None, api_version=None, kind=None):
         }
         return func
     return decorator
+
+
+def multi_resource_spec(**kwargs):
+    def decorator(func):
+        func._kubelint_multi_resource_spec = kwargs
+        return func
+    return decorator
