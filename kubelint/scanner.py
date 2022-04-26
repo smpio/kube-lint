@@ -1,7 +1,8 @@
 import logging
 
 import raven
-from kubernetes import client
+from kubernetes.client import ApiClient
+from kubernetes.dynamic import DynamicClient
 
 log = logging.getLogger(__name__)
 
@@ -10,11 +11,29 @@ class Scanner:
     def __init__(self, checks):
         self.checks = checks
         self.sentry = None
-        self.apiserver_version = client.VersionApi().get_code().git_version
+        self.client = DynamicClient(ApiClient())
+        self.resources_cache = {}
 
     def scan(self, namespace=None):
         for check in self.checks:
-            self.report(check(namespace), check.__module__)
+            log.info('Scanning using %s', check)
+            try:
+                resource_spec = check._kubelint_resource_spec
+            except AttributeError:
+                log.error('Invalid check %s: no decorator', check)
+                continue
+            resources = self.client.resources.search(**resource_spec)
+            if not resources:
+                log.error('Invalid check %s: no resources matching %s', check, resource_spec)
+                continue
+            log.debug('Selector %s matches %s', resource_spec, resources)
+            resource = resources[0]
+            try:
+                obj_list = self.resources_cache[resource]
+            except KeyError:
+                obj_list = self.resources_cache[resource] = self.client.get(resource, namespace=namespace)
+            for obj in obj_list.items:
+                self.report(check(obj), check.__module__)
 
     def report(self, issues, check_name):
         for issue in issues:
@@ -43,5 +62,5 @@ class Scanner:
                                    enable_breadcrumbs=False,
                                    include_versions=False,
                                    name='kubernetes',
-                                   release=self.apiserver_version,
+                                   release=self.client.version,
                                    context={})

@@ -5,18 +5,20 @@ import argparse
 import importlib.util
 import importlib.machinery
 
-import kubernetes.client
-import kubernetes.config
+from utils.kubernetes.config import configure
 
 from .scanner import Scanner
+
+log = logging.getLogger(__name__)
 
 
 def main():
     default_checks_dir = os.path.join(os.path.dirname(__file__), 'checks')
 
     arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument('--master', help='kubernetes api server url')
+    arg_parser.add_argument('--in-cluster', action='store_true', help='configure with in-cluster config')
     arg_parser.add_argument('--sentry-dsn', help='send errors and warnings to sentry')
-    arg_parser.add_argument('--in-cluster', action='store_true', help='configure with in cluster kubeconfig')
     arg_parser.add_argument('-n', '--namespace', help='scan only this namespace (default to scan all)')
     arg_parser.add_argument('-c', '--check', default=[], action='append', help='file or directory with checks')
     arg_parser.add_argument('--no-defaults', action='store_true', help='skip default checks')
@@ -24,11 +26,7 @@ def main():
     args = arg_parser.parse_args()
 
     logging.basicConfig(format='%(levelname)s: %(message)s', level=args.log_level)
-
-    if args.in_cluster:
-        kubernetes.config.load_incluster_config()
-    else:
-        kubernetes.client.configuration.host = 'http://127.0.0.1:8001'
+    configure(args.master, args.in_cluster)
 
     if not args.no_defaults:
         args.check.insert(0, default_checks_dir)

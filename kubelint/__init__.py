@@ -2,7 +2,8 @@ class Issue:
     ERROR = 'ERROR'
     WARNING = 'WARNING'
 
-    def __init__(self, object, description, severity=ERROR,
+    def __init__(self, object, description,
+                 severity=ERROR,
                  object_name=None,
                  namespace=None,
                  api_version=None,
@@ -41,3 +42,15 @@ class Issue:
             return self.object_name
         else:
             return '{}/{}'.format(self.namespace, self.object_name)
+
+
+def resource_spec(prefix=None, group=None, api_version=None, kind=None):
+    def decorator(func):
+        func._kubelint_resource_spec = {
+            'prefix': prefix,
+            'group': group,
+            'api_version': api_version,
+            'kind': kind,
+        }
+        return func
+    return decorator
