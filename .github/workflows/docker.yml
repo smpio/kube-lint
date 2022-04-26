@@ -1,0 +1,12 @@
+name: Docker
+
+on:
+  push:
+    branches: [ master ]
+    tags: [ 'v*.*.*' ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    uses: smpio/github-workflows/.github/workflows/docker.yaml@master
