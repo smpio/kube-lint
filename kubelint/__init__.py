@@ -22,8 +22,7 @@ class Issue:
         if object_kind is None and object is not None:
             object_kind = object.kind
         if object_kind is None and list_resource is not None:
-            if list_resource.kind.endswith('List'):
-                object_kind = list_resource.kind[:-4]
+            object_kind = list_resource.removesuffix('List')
 
         self.object = object
         self.description = description
